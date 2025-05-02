@@ -48,6 +48,11 @@
 <textarea id="reportText"></textarea>
 
 <script>
+  function calculate() {
+  if (!$('date').value) {
+    alert("请填写日期！");
+    return;
+  }
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('sw.js');
   }
