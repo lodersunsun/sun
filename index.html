@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>蛋鸡生产日报工具</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="icon-192.png" />
+  <style>
+    body { font-family: Arial; padding: 1rem; max-width: 800px; margin: auto; line-height: 1.6; }
+    table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
+    td, th { border: 1px solid #aaa; padding: 6px; text-align: center; }
+    input, textarea { width: 95%; padding: 4px; box-sizing: border-box; }
+    textarea { height: 100px; }
+    button { padding: 8px 14px; margin-top: 10px; }
+  </style>
+</head>
+<body>
+<h1>蛋鸡生产日报工具</h1>
+<table>
+<tr><td>日期</td><td><input type="date" id="date"></td>
+    <td>栋号</td><td><input type="text" id="flock" value="临猗2栋"></td></tr>
+<tr><td>品种</td><td><input type="text" id="breed" value="粉六"></td>
+    <td>日龄</td><td><input type="number" id="age"></td></tr>
+<tr><td>昨日存栏</td><td><input type="number" id="stockYesterday"></td>
+    <td>死淘数</td><td><input type="number" id="deadCount" oninput="updateStock()"></td></tr>
+<tr><td>今日存栏</td><td colspan="3"><input type="number" id="stockToday" readonly></td></tr>
+<tr><td>光照</td><td><input type="text" id="light"></td>
+    <td>天气</td><td><input type="text" id="weather"></td></tr>
+<tr><td>用药</td><td colspan="3"><input type="text" id="medication"></td></tr>
+</table>
+
+<table>
+<tr><td>产蛋数</td><td><input type="number" id="eggCount"></td>
+    <td>破蛋数</td><td><input type="number" id="brokenEggs"></td></tr>
+<tr><td>产蛋总重（斤）</td><td><input type="number" id="eggWeight"></td>
+    <td>收蛋时间</td><td><input type="text" id="collectTime"></td></tr>
+<tr><td>饮水总量(m³)</td><td><input type="number" id="waterTotal"></td>
+    <td>昨日料表</td><td><input type="number" id="feedMeterPrev"></td></tr>
+<tr><td>今日料表</td><td><input type="number" id="feedMeterToday"></td>
+    <td>进料数</td><td><input type="number" id="feedAdded"></td></tr>
+<tr><td>对比用料</td><td colspan="3"><input type="number" id="feedCompare"></td></tr>
+</table>
+
+<button onclick="calculate()">计算并生成日报</button>
+
+<h3>日报结果</h3>
+<textarea id="reportText"></textarea>
+
+<script>
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js');
+  }
+
+  function $(id) { return document.getElementById(id); }
+  function updateStock() {
+    $('stockToday').value = ($('stockYesterday').value - $('deadCount').value) || 0;
+  }
+
+  function calculate() {
+    const s = +$('stockYesterday').value - +$('deadCount').value;
+    const e = +$('eggCount').value, w = +$('eggWeight').value;
+    const b = +$('brokenEggs').value, wt = +$('waterTotal').value;
+    const f1 = +$('feedMeterPrev').value, f2 = +$('feedMeterToday').value, fa = +$('feedAdded').value;
+    const fc = +$('feedCompare').value;
+    const tf = f1 + fa - f2;
+    const af = s ? tf / s * 1000 : 0;
+    const lr = s ? e / s * 100 : 0;
+    const ep = s ? w / s : 0;
+    const br = e ? b / e * 100 : 0;
+    const box = e ? w / e * 360 : 0;
+    const wa = s ? wt / s * 1e6 : 0;
+    const fe = ep ? af / ep : 0;
+    const wf = af ? wa / af : 0;
+
+    const d = new Date($('date').value);
+    const ds = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+
+    $('reportText').value = 
+\`\${$('flock').value}
+日期：\${ds}
+饲料标签：
+VK116
+1069/4.26（19400）
+品种：\${$('breed').value}
+日龄：\${$('age').value}
+存栏：\${s}
+死淘：\${$('deadCount').value}
+日总采食：\${tf}
+日均采食：\${af.toFixed(1)}
+产蛋个数：\${e}
+产蛋率：\${lr.toFixed(1)}
+收蛋时间：\${$('collectTime').value}
+料蛋比：\${fe.toFixed(2)}
+产蛋斤数：\${w.toFixed(2)}
+只均产蛋量：\${ep.toFixed(1)}
+破蛋个数：\${b}
+破蛋率：\${br.toFixed(2)}
+箱重：\${box.toFixed(2)}
+总饮水：\${wt.toFixed(2)}
+日均饮水：\${wa.toFixed(1)}
+光照：\${$('light').value}
+天气：\${$('weather').value}
+用药：
+\${$('medication').value}
+\`;
+  }
+</script>
+</body>
+</html>
