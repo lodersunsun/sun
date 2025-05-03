@@ -23,7 +23,7 @@
     .navbar {
       background-color: #4CAF50;
       color: #FFFFFF;
-      padding: 1rem;
+      padding: 0.8rem 1rem;
       display: flex;
       justify-content: space-between;
       align-items: center;
@@ -32,13 +32,13 @@
     }
     .navbar h1 {
       margin: 0;
-      font-size: 1.5rem;
+      font-size: 1.4rem;
     }
     .navbar a {
       color: #FFFFFF;
       text-decoration: none;
-      margin-left: 1rem;
-      transition: color 0.3s;
+      margin-left: 0.8rem;
+      font-size: 0.9rem;
     }
     .navbar a:hover {
       color: #E0E0E0;
@@ -47,14 +47,14 @@
       background-color: #FFFFFF;
       border-radius: 8px;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 1.5rem;
-      margin-bottom: 1.5rem;
+      padding: 1.2rem;
+      margin-bottom: 1.2rem;
       animation: fadeIn 0.5s ease-in;
     }
     .card h2 {
       color: #4CAF50;
       margin-top: 0;
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       display: flex;
       align-items: center;
     }
@@ -64,25 +64,29 @@
     table {
       width: 100%;
       border-collapse: collapse;
-      margin-bottom: 1rem;
+      font-size: 0.9rem;
     }
-    td, th {
-      padding: 8px;
+    th, td {
+      padding: 6px;
       text-align: left;
     }
     th {
       color: #2196F3;
       font-weight: 600;
+      white-space: nowrap;
     }
-    input, textarea {
+    td {
+      width: 50%;
+    }
+    input, select, textarea {
       width: 100%;
-      padding: 8px;
+      padding: 6px;
       border: 1px solid #E0E0E0;
       border-radius: 4px;
       box-sizing: border-box;
-      transition: border-color 0.3s;
+      font-size: 0.9rem;
     }
-    input:focus, textarea:focus {
+    input:focus, select:focus, textarea:focus {
       border-color: #4CAF50;
       outline: none;
     }
@@ -94,10 +98,10 @@
       background-color: #4CAF50;
       color: #FFFFFF;
       border: none;
-      padding: 10px 16px;
+      padding: 8px 12px;
       border-radius: 4px;
       cursor: pointer;
-      transition: background-color 0.3s;
+      font-size: 0.9rem;
       margin-right: 0.5rem;
     }
     button:hover {
@@ -106,23 +110,64 @@
     .error {
       color: #D32F2F;
       margin-top: 0.5rem;
-      font-size: 0.9rem;
+      font-size: 0.8rem;
     }
     textarea {
-      height: 200px;
+      height: 180px;
       resize: vertical;
     }
     .chart-container {
       margin-top: 1rem;
+    }
+    .averages {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background-color: #F9F9F9;
+      border-radius: 4px;
+    }
+    .averages p {
+      margin: 0.3rem 0;
+      font-size: 0.9rem;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
     }
     @media (max-width: 600px) {
-      .navbar h1 { font-size: 1.2rem; }
-      .card { padding: 1rem; }
-      table { font-size: 0.9rem; }
+      .container {
+        padding: 0.5rem;
+      }
+      .navbar h1 {
+        font-size: 1.2rem;
+      }
+      .navbar a {
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+      }
+      .card {
+        padding: 0.8rem;
+        margin-bottom: 1rem;
+      }
+      table {
+        font-size: 0.8rem;
+        display: block;
+        overflow-x: auto;
+      }
+      th, td {
+        padding: 4px;
+        min-width: 100px;
+      }
+      input, select, textarea {
+        font-size: 0.8rem;
+        padding: 5px;
+      }
+      button {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+      }
+      .card h2 {
+        font-size: 1.1rem;
+      }
     }
   </style>
 </head>
@@ -143,13 +188,15 @@
     <h2><i class="fas fa-keyboard"></i> 数据输入</h2>
     <table>
       <tr><th>日期</th><td><input type="date" id="date" oninput="calculate()"></td>
-          <th>饲料标签</th><td><input type="text" id="feedLabel" value="VK116 1069/4.26（19400）" oninput="calculate()"></td></tr>
+          <th>饲料标签</th><td><select id="feedLabel" oninput="calculate()"></select></td></tr>
       <tr><th>日龄</th><td><input type="number" id="age" min="0" oninput="calculate()"></td>
-          <th>存栏</th><td><input type="number" id="stock" min="0" oninput="calculate()"></td></tr>
+          <th>昨日存栏</th><td><input type="number" id="stockYesterday" min="0" oninput="calculate()"></td></tr>
       <tr><th>死淘</th><td><input type="number" id="deadCount" min="0" oninput="calculate()"></td>
-          <th>昨日料表（kg）</th><td><input type="number" id="feedMeterPrev" min="0" oninput="calculate()"></td></tr>
-      <tr><th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td>
-          <th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td></tr>
+          <th>今日存栏</th><td><input type="number" id="stockToday" readonly></td></tr>
+      <tr><th>昨日料表（kg）</th><td><input type="number" id="feedMeterPrev" min="0" oninput="calculate()"></td>
+          <th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td></tr>
+      <tr><th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td>
+          <th>收蛋时间</th><td><input type="time" id="collectTime" oninput="calculate()"></td></tr>
       <tr><th>产蛋个数</th><td><input type="number" id="eggCount" min="0" oninput="calculate()"></td>
           <th>产蛋斤数（斤）</th><td><input type="number" id="eggWeight" min="0" oninput="calculate()"></td></tr>
       <tr><th>破蛋个数</th><td><input type="number" id="brokenEggs" min="0" oninput="calculate()"></td>
@@ -172,6 +219,7 @@
       <tr><th>水料比</th><td><input type="number" id="waterFeedRatio" readonly></td>
           <td></td></tr>
     </table>
+    <div class="averages" id="averages"></div>
     <div class="chart-container">
       <canvas id="trendChart"></canvas>
     </div>
@@ -194,15 +242,44 @@
 // 快捷获取 DOM 元素
 function $(id) { return document.getElementById(id); }
 
-// 历史数据存储
+// 历史数据和饲料标签存储
 let history = JSON.parse(localStorage.getItem('eggFarmHistory')) || [];
+let feedLabels = JSON.parse(localStorage.getItem('feedLabels')) || ['VK116 1069/4.26（19400）'];
+
+// 初始化饲料标签下拉菜单
+function initFeedLabels() {
+  const select = $('feedLabel');
+  feedLabels.forEach(label => {
+    const option = document.createElement('option');
+    option.value = label;
+    option.textContent = label;
+    select.appendChild(option);
+  });
+  select.value = feedLabels[0];
+  select.addEventListener('change', () => {
+    const newLabel = select.value;
+    if (newLabel && !feedLabels.includes(newLabel)) {
+      feedLabels.push(newLabel);
+      localStorage.setItem('feedLabels', JSON.stringify(feedLabels));
+      const option = document.createElement('option');
+      option.value = newLabel;
+      option.textContent = newLabel;
+      select.appendChild(option);
+    }
+  });
+}
 
 // 计算逻辑（实时更新）
 function calculate() {
   $('error').textContent = '';
 
-  const stock = parseFloat($('stock').value) || 0;
+  // 计算今日存栏
+  const stockYesterday = parseFloat($('stockYesterday').value) || 0;
   const deadCount = parseFloat($('deadCount').value) || 0;
+  const stockToday = stockYesterday - deadCount;
+  $('stockToday').value = stockToday >= 0 ? stockToday : 0;
+
+  // 获取输入值
   const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
   const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
   const eggCount = parseFloat($('eggCount').value) || 0;
@@ -210,16 +287,18 @@ function calculate() {
   const brokenEggs = parseFloat($('brokenEggs').value) || 0;
   const waterTotal = parseFloat($('waterTotal').value) || 0;
 
+  // 计算指标
   const totalFeed = feedMeterPrev - feedMeterToday;
-  const avgFeed = stock ? (totalFeed / stock * 1000).toFixed(1) : 0;
-  const layRate = stock ? (eggCount / stock * 100).toFixed(1) : 0;
-  const eggPerHen = stock ? (eggWeight / stock * 1000).toFixed(1) : 0;
+  const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
+  const layRate = stockToday ? (eggCount / stockToday * 100).toFixed(1) : 0;
+  const eggPerHen = stockToday ? (eggWeight / stockToday * 1000).toFixed(1) : 0;
   const brokenRate = eggCount ? (brokenEggs / eggCount * 100).toFixed(1) : 0;
-  const boxWeight = eggCount ? (eggWeight / eggCount * 360 * 2).toFixed(1) : 0;
-  const avgWater = stock ? (waterTotal / stock * 1000000).toFixed(1) : 0;
-  const feedEggRatio = eggPerHen ? (avgFeed / eggPerHen).toFixed(1) : 0;
+  const boxWeight = eggCount ? (eggWeight / eggCount * 360 * 2).toFixed(2) : 0;
+  const avgWater = stockToday ? (waterTotal / stockToday * 1000000).toFixed(1) : 0;
+  const feedEggRatio = eggPerHen ? (avgFeed / eggPerHen).toFixed(2) : 0;
   const waterFeedRatio = avgFeed ? (avgWater / avgFeed).toFixed(1) : 0;
 
+  // 更新实时结果
   $('totalFeed').value = totalFeed.toFixed(1);
   $('avgFeed').value = avgFeed;
   $('layRate').value = layRate;
@@ -234,22 +313,66 @@ function calculate() {
   if ($('date').value) {
     const entry = {
       date: $('date').value,
-      layRate,
       avgFeed,
-      eggPerHen
+      layRate,
+      eggPerHen,
+      boxWeight,
+      feedEggRatio
     };
     history = history.filter(h => h.date !== entry.date);
     history.push(entry);
     if (history.length > 7) history.shift();
     localStorage.setItem('eggFarmHistory', JSON.stringify(history));
     updateChart();
+    updateAverages();
   }
+}
+
+// 计算七日平均值
+function updateAverages() {
+  if (history.length < 7) {
+    $('averages').innerHTML = '<p>数据不足7天，无法计算平均值</p>';
+    return;
+  }
+  const avgFeed = (history.reduce((sum, h) => sum + parseFloat(h.avgFeed), 0) / 7).toFixed(1);
+  const avgLayRate = (history.reduce((sum, h) => sum + parseFloat(h.layRate), 0) / 7).toFixed(1);
+  const avgEggPerHen = (history.reduce((sum, h) => sum + parseFloat(h.eggPerHen), 0) / 7).toFixed(1);
+  const avgBoxWeight = (history.reduce((sum, h) => sum + parseFloat(h.boxWeight), 0) / 7).toFixed(2);
+  const avgFeedEggRatio = (history.reduce((sum, h) => sum + parseFloat(h.feedEggRatio), 0) / 7).toFixed(2);
+  $('averages').innerHTML = `
+    <p><strong>七日平均值</strong></p>
+    <p>日均采食：${avgFeed} g</p>
+    <p>产蛋率：${avgLayRate} %</p>
+    <p>只均产蛋量：${avgEggPerHen} g</p>
+    <p>每箱蛋重：${avgBoxWeight} 斤</p>
+    <p>料蛋比：${avgFeedEggRatio}</p>
+  `;
+}
+
+// 更新趋势图
+function updateChart() {
+  const ctx = $('trendChart').getContext('2d');
+  new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: history.map(h => h.date),
+      datasets: [
+        { label: '产蛋率 (%)', data: history.map(h => h.layRate), borderColor: '#4CAF50', fill: false },
+        { label: '日均采食 (g)', data: history.map(h => h.avgFeed), borderColor: '#2196F3', fill: false },
+        { label: '只均产蛋量 (g)', data: history.map(h => h.eggPerHen), borderColor: '#FF9800', fill: false }
+      ]
+    },
+    options: {
+      responsive: true,
+      scales: { y: { beginAtZero: true } }
+    }
+  });
 }
 
 // 生成日报
 function generateReport() {
-  if (!$( 'date').value || !$( 'stock').value || !$( 'eggCount').value || !$( 'eggWeight').value) {
-    $('error').textContent = '请填写日期、存栏、产蛋个数和产蛋斤数！';
+  if (!$( 'date').value || !$( 'stockYesterday').value || !$( 'eggCount').value || !$( 'eggWeight').value) {
+    $('error').textContent = '请填写日期、昨日存栏、产蛋个数和产蛋斤数！';
     return;
   }
 
@@ -257,11 +380,13 @@ function generateReport() {
   const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
   const feedLabel = $('feedLabel').value || '未知';
   const age = $('age').value || '未知';
-  const stock = parseFloat($('stock').value) || 0;
+  const stockYesterday = parseFloat($('stockYesterday').value) || 0;
   const deadCount = parseFloat($('deadCount').value) || 0;
+  const stockToday = parseFloat($('stockToday').value) || 0;
   const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
   const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
   const feedCompare = parseFloat($('feedCompare').value) || 0;
+  const collectTime = $('collectTime').value || '未知';
   const eggCount = parseFloat($('eggCount').value) || 0;
   const eggWeight = parseFloat($('eggWeight').value) || 0;
   const brokenEggs = parseFloat($('brokenEggs').value) || 0;
@@ -280,15 +405,18 @@ function generateReport() {
 日期：${dateStr}
 饲料标签：${feedLabel}
 日龄：${age}
-存栏：${stock}
+昨日存栏：${stockYesterday}
 死淘：${deadCount}
+今日存栏：${stockToday}
 昨日料表（kg）：${feedMeterPrev.toFixed(1)}
 今日料表（kg）：${feedMeterToday.toFixed(1)}
 对比耗料（kg）：${feedCompare.toFixed(1)}
-日总采食（kg）：${totalFeed.toFixed(1)}
-日均采食（g）：${avgFeed}
+收蛋时间：${collectTime}
 产蛋个数：${eggCount}
 产蛋斤数（斤）：${eggWeight.toFixed(1)}
+日总采食（kg）：${totalFeed.toFixed(1)}
+日均采食（g）：${avgFeed}
+产蛋率（%）：${layRate}
 只均产蛋量（g）：${eggPerHen}
 破蛋个数：${brokenEggs}
 破蛋率（%）：${brokenRate}
@@ -323,43 +451,6 @@ function saveReport() {
   URL.revokeObjectURL(url);
 }
 
-// 更新趋势图
-function updateChart() {
-  const ctx = $('trendChart').getContext('2d');
-  new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: history.map(h => h.date),
-      datasets: [
-        {
-          label: '产蛋率 (%)',
-          data: history.map(h => h.layRate),
-          borderColor: '#4CAF50',
-          fill: false
-        },
-        {
-          label: '日均采食 (g)',
-          data: history.map(h => h.avgFeed),
-          borderColor: '#2196F3',
-          fill: false
-        },
-        {
-          label: '只均产蛋量 (g)',
-          data: history.map(h => h.eggPerHen),
-          borderColor: '#FF9800',
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
-}
-
 // 服务工作者注册
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -370,6 +461,7 @@ if ('serviceWorker' in navigator) {
 }
 
 // 初始化
+initFeedLabels();
 calculate();
 </script>
 </body>
