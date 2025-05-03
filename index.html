@@ -129,6 +129,14 @@
       margin: 0.3rem 0;
       font-size: 0.9rem;
     }
+    .time-range {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .time-range input {
+      width: 48%;
+    }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
       to { opacity: 1; transform: translateY(0); }
@@ -168,6 +176,13 @@
       .card h2 {
         font-size: 1.1rem;
       }
+      .time-range {
+        flex-direction: column;
+        gap: 0.3rem;
+      }
+      .time-range input {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -188,7 +203,7 @@
     <h2><i class="fas fa-keyboard"></i> 数据输入</h2>
     <table>
       <tr><th>日期</th><td><input type="date" id="date" oninput="calculate()"></td>
-          <th>饲料标签</th><td><select id="feedLabel" oninput="calculate()"></select></td></tr>
+          <th>饲料标签</th><td><input type="text" id="feedLabel" list="feedLabelList" oninput="calculate(); updateFeedLabels()"></td></tr>
       <tr><th>日龄</th><td><input type="number" id="age" min="0" oninput="calculate()"></td>
           <th>昨日存栏</th><td><input type="number" id="stockYesterday" min="0" oninput="calculate()"></td></tr>
       <tr><th>死淘</th><td><input type="number" id="deadCount" min="0" oninput="calculate()"></td>
@@ -196,12 +211,19 @@
       <tr><th>昨日料表（kg）</th><td><input type="number" id="feedMeterPrev" min="0" oninput="calculate()"></td>
           <th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td></tr>
       <tr><th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td>
-          <th>收蛋时间</th><td><input type="time" id="collectTime" oninput="calculate()"></td></tr>
+          <th>收蛋时间</th><td>
+            <div class="time-range">
+              <input type="time" id="collectTimeStart" oninput="calculate()">
+              <span>-</span>
+              <input type="time" id="collectTimeEnd" oninput="calculate()">
+            </div>
+          </td></tr>
       <tr><th>产蛋个数</th><td><input type="number" id="eggCount" min="0" oninput="calculate()"></td>
           <th>产蛋斤数（斤）</th><td><input type="number" id="eggWeight" min="0" oninput="calculate()"></td></tr>
       <tr><th>破蛋个数</th><td><input type="number" id="brokenEggs" min="0" oninput="calculate()"></td>
           <th>日总饮水（t）</th><td><input type="number" id="waterTotal" min="0" step="0.1" oninput="calculate()"></td></tr>
     </table>
+    <datalist id="feedLabelList"></datalist>
   </div>
 
   <!-- 实时分析模块 -->
@@ -246,27 +268,26 @@ function $(id) { return document.getElementById(id); }
 let history = JSON.parse(localStorage.getItem('eggFarmHistory')) || [];
 let feedLabels = JSON.parse(localStorage.getItem('feedLabels')) || ['VK116 1069/4.26（19400）'];
 
-// 初始化饲料标签下拉菜单
+// 初始化饲料标签
 function initFeedLabels() {
-  const select = $('feedLabel');
+  const datalist = $('feedLabelList');
+  datalist.innerHTML = '';
   feedLabels.forEach(label => {
     const option = document.createElement('option');
     option.value = label;
-    option.textContent = label;
-    select.appendChild(option);
+    datalist.appendChild(option);
   });
-  select.value = feedLabels[0];
-  select.addEventListener('change', () => {
-    const newLabel = select.value;
-    if (newLabel && !feedLabels.includes(newLabel)) {
-      feedLabels.push(newLabel);
-      localStorage.setItem('feedLabels', JSON.stringify(feedLabels));
-      const option = document.createElement('option');
-      option.value = newLabel;
-      option.textContent = newLabel;
-      select.appendChild(option);
-    }
-  });
+  $('feedLabel').value = feedLabels[0];
+}
+
+// 更新饲料标签
+function updateFeedLabels() {
+  const newLabel = $('feedLabel').value.trim();
+  if (newLabel && !feedLabels.includes(newLabel)) {
+    feedLabels.push(newLabel);
+    localStorage.setItem('feedLabels', JSON.stringify(feedLabels));
+    initFeedLabels();
+  }
 }
 
 // 计算逻辑（实时更新）
@@ -386,7 +407,9 @@ function generateReport() {
   const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
   const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
   const feedCompare = parseFloat($('feedCompare').value) || 0;
-  const collectTime = $('collectTime').value || '未知';
+  const collectTimeStart = $('collectTimeStart').value;
+  const collectTimeEnd = $('collectTimeEnd').value;
+  const collectTime = collectTimeStart && collectTimeEnd ? `${collectTimeStart}-${collectTimeEnd}` : '未知';
   const eggCount = parseFloat($('eggCount').value) || 0;
   const eggWeight = parseFloat($('eggWeight').value) || 0;
   const brokenEggs = parseFloat($('brokenEggs').value) || 0;
