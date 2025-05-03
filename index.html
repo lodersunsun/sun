@@ -13,103 +13,133 @@
     input, textarea { width: 95%; padding: 4px; box-sizing: border-box; }
     textarea { height: 100px; }
     button { padding: 8px 14px; margin-top: 10px; }
+    .error { color: red; }
   </style>
 </head>
 <body>
 <h1>蛋鸡生产日报工具</h1>
 <table>
-<tr><td>日期</td><td><input type="date" id="date"></td>
-    <td>栋号</td><td><input type="text" id="flock" value="临猗2栋"></td></tr>
-<tr><td>品种</td><td><input type="text" id="breed" value="粉六"></td>
-    <td>日龄</td><td><input type="number" id="age"></td></tr>
-<tr><td>昨日存栏</td><td><input type="number" id="stockYesterday"></td>
-    <td>死淘数</td><td><input type="number" id="deadCount" oninput="updateStock()"></td></tr>
-<tr><td>今日存栏</td><td colspan="3"><input type="number" id="stockToday" readonly></td></tr>
-<tr><td>光照</td><td><input type="text" id="light"></td>
-    <td>天气</td><td><input type="text" id="weather"></td></tr>
-<tr><td>用药</td><td colspan="3"><input type="text" id="medication"></td></tr>
+  <tr><td>日期</td><td><input type="date" id="date"></td>
+      <td>栋号</td><td><input type="text" id="flock" value="临猗2栋"></td></tr>
+  <tr><td>品种</td><td><input type="text" id="breed" value="粉六"></td>
+      <td>日龄</td><td><input type="number" id="age" min="0"></td></tr>
+  <tr><td>昨日存栏</td><td><input type="number" id="stockYesterday" min="0" oninput="updateStock()"></td>
+      <td>死淘数</td><td><input type="number" id="deadCount" min="0" oninput="updateStock()"></td></tr>
+  <tr><td>今日存栏</td><td colspan="3"><input type="number" id="stockToday" readonly></td></tr>
+  <tr><td>光照</td><td><input type="text" id="light"></td>
+      <td>天气</td><td><input type="text" id="weather"></td></tr>
+  <tr><td>用药</td><td colspan="3"><input type="text" id="medication"></td></tr>
 </table>
 
 <table>
-<tr><td>产蛋数</td><td><input type="number" id="eggCount"></td>
-    <td>破蛋数</td><td><input type="number" id="brokenEggs"></td></tr>
-<tr><td>产蛋总重（斤）</td><td><input type="number" id="eggWeight"></td>
-    <td>收蛋时间</td><td><input type="text" id="collectTime"></td></tr>
-<tr><td>饮水总量(m³)</td><td><input type="number" id="waterTotal"></td>
-    <td>昨日料表</td><td><input type="number" id="feedMeterPrev"></td></tr>
-<tr><td>今日料表</td><td><input type="number" id="feedMeterToday"></td>
-    <td>进料数</td><td><input type="number" id="feedAdded"></td></tr>
-<tr><td>对比用料</td><td colspan="3"><input type="number" id="feedCompare"></td></tr>
+  <tr><td>产蛋数</td><td><input type="number" id="eggCount" min="0"></td>
+      <td>破蛋数</td><td><input type="number" id="brokenEggs" min="0"></td></tr>
+  <tr><td>产蛋总重（斤）</td><td><input type="number" id="eggWeight" min="0"></td>
+      <td>收蛋时间</td><td><input type="text" id="collectTime"></td></tr>
+  <tr><td>饮水总量(m³)</td><td><input type="number" id="waterTotal" min="0"></td>
+      <td>昨日料表</td><td><input type="number" id="feedMeterPrev" min="0"></td></tr>
+  <tr><td>今日料表</td><td><input type="number" id="feedMeterToday" min="0"></td>
+      <td>进料数</td><td><input type="number" id="feedAdded" min="0"></td></tr>
+  <tr><td>对比用料</td><td colspan="3"><input type="number" id="feedCompare" min="0"></td></tr>
 </table>
 
 <button onclick="calculate()">计算并生成日报</button>
 
 <h3>日报结果</h3>
-<textarea id="reportText"></textarea>
+<textarea id="reportText" readonly></textarea>
+<div id="error" class="error"></div>
 
 <script>
-  function calculate() {
-  if (!$('date').value) {
-    alert("请填写日期！");
+// 快捷获取 DOM 元素
+function $(id) { return document.getElementById(id); }
+
+// 更新今日存栏
+function updateStock() {
+  const stockYesterday = parseFloat($('stockYesterday').value) || 0;
+  const deadCount = parseFloat($('deadCount').value) || 0;
+  $('stockToday').value = stockYesterday - deadCount >= 0 ? stockYesterday - deadCount : 0;
+}
+
+// 计算并生成日报
+function calculate() {
+  // 清空错误信息
+  $('error').textContent = '';
+
+  // 检查必填字段
+  if (!$( 'date').value) {
+    $('error').textContent = '请填写日期！';
     return;
   }
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
+  if (!$( 'stockYesterday').value || !$( 'eggCount').value || !$( 'eggWeight').value) {
+    $('error').textContent = '请填写昨日存栏、产蛋数和产蛋总重！';
+    return;
   }
 
-  function $(id) { return document.getElementById(id); }
-  function updateStock() {
-    $('stockToday').value = ($('stockYesterday').value - $('deadCount').value) || 0;
-  }
+  // 获取输入值并转换为数字
+  const stockYesterday = parseFloat($('stockYesterday').value) || 0;
+  const deadCount = parseFloat($('deadCount').value) || 0;
+  const stockToday = stockYesterday - deadCount;
+  const eggCount = parseFloat($('eggCount').value) || 0;
+  const eggWeight = parseFloat($('eggWeight').value) || 0;
+  const brokenEggs = parseFloat($('brokenEggs').value) || 0;
+  const waterTotal = parseFloat($('waterTotal').value) || 0;
+  const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
+  const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
+  const feedAdded = parseFloat($('feedAdded').value) || 0;
+  // const feedCompare = parseFloat($('feedCompare').value) || 0; // 未使用
 
-  function calculate() {
-    const s = +$('stockYesterday').value - +$('deadCount').value;
-    const e = +$('eggCount').value, w = +$('eggWeight').value;
-    const b = +$('brokenEggs').value, wt = +$('waterTotal').value;
-    const f1 = +$('feedMeterPrev').value, f2 = +$('feedMeterToday').value, fa = +$('feedAdded').value;
-    const fc = +$('feedCompare').value;
-    const tf = f1 + fa - f2;
-    const af = s ? tf / s * 1000 : 0;
-    const lr = s ? e / s * 100 : 0;
-    const ep = s ? w / s : 0;
-    const br = e ? b / e * 100 : 0;
-    const box = e ? w / e * 360 : 0;
-    const wa = s ? wt / s * 1e6 : 0;
-    const fe = ep ? af / ep : 0;
-    const wf = af ? wa / af : 0;
+  // 计算逻辑
+  const totalFeed = feedMeterPrev + feedAdded - feedMeterToday; // 日总采食
+  const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0; // 日均采食
+  const layRate = stockToday ? (eggCount / stockToday * 100).toFixed(1) : 0; // 产蛋率
+  const eggPerHen = stockToday ? (eggWeight / stockToday).toFixed(1) : 0; // 只均产蛋量
+  const brokenRate = eggCount ? (brokenEggs / eggCount * 100).toFixed(2) : 0; // 破蛋率
+  const boxWeight = eggCount ? (eggWeight / eggCount * 360).toFixed(2) : 0; // 箱重
+  const avgWater = stockToday ? (waterTotal / stockToday * 1e6).toFixed(1) : 0; // 日均饮水
+  const feedEggRatio = eggPerHen ? (avgFeed / eggPerHen).toFixed(2) : 0; // 料蛋比
+  const waterFeedRatio = avgFeed ? (avgWater / avgFeed).toFixed(2) : 0; // 水料比（未在输出中使用）
 
-    const d = new Date($('date').value);
-    const ds = (d.getMonth() + 1) + '月' + d.getDate() + '日';
+  // 格式化日期
+  const date = new Date($('date').value);
+  const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
 
-    $('reportText').value = 
-\`\${$('flock').value}
-日期：\${ds}
+  // 生成日报
+  $('reportText').value = `${$('flock').value}
+日期：${dateStr}
 饲料标签：
 VK116
 1069/4.26（19400）
-品种：\${$('breed').value}
-日龄：\${$('age').value}
-存栏：\${s}
-死淘：\${$('deadCount').value}
-日总采食：\${tf}
-日均采食：\${af.toFixed(1)}
-产蛋个数：\${e}
-产蛋率：\${lr.toFixed(1)}
-收蛋时间：\${$('collectTime').value}
-料蛋比：\${fe.toFixed(2)}
-产蛋斤数：\${w.toFixed(2)}
-只均产蛋量：\${ep.toFixed(1)}
-破蛋个数：\${b}
-破蛋率：\${br.toFixed(2)}
-箱重：\${box.toFixed(2)}
-总饮水：\${wt.toFixed(2)}
-日均饮水：\${wa.toFixed(1)}
-光照：\${$('light').value}
-天气：\${$('weather').value}
+品种：${$('breed').value}
+日龄：${$('age').value || '未知'}
+存栏：${stockToday}
+死淘：${deadCount}
+日总采食：${totalFeed.toFixed(1)}
+日均采食：${avgFeed}
+产蛋个数：${eggCount}
+产蛋率：${layRate}
+收蛋时间：${$('collectTime').value || '未知'}
+料蛋比：${feedEggRatio}
+产蛋斤数：${eggWeight.toFixed(2)}
+只均产蛋量：${eggPerHen}
+破蛋个数：${brokenEggs}
+破蛋率：${brokenRate}
+箱重：${boxWeight}
+总饮水：${waterTotal.toFixed(2)}
+日均饮水：${avgWater}
+光照：${$('light').value || '未知'}
+天气：${$('weather').value || '未知'}
 用药：
-\${$('medication').value}
-\`;
-  }
+${$('medication').value || '无'}`.trim();
+}
+
+// 服务工作者注册（页面加载时执行一次）
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch(err => {
+      console.error('Service Worker 注册失败:', err);
+    });
+  });
+}
 </script>
 </body>
 </html>
