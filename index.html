@@ -1,47 +1,533 @@
-{
-  "date": "2025-05-01",
-  "houseNumber": "临猗2 栋",
-  "breed": "粉六",
-  "age": "432",
-  "stockYesterday": 199972,
-  "deadCount": 99,
-  "stockToday": 199873,
-  "collectTimeStart": "08:00",
-  "collectTimeEnd": "08:56",
-  "eggCount": 169994,
-  "eggWeight": 9793.65,
-  "brokenEggs": 1770,
-  "waterTotal": 42.83,
-  "lighting": "15.5",
-  "weather": "晴",
-  "medication": "VC:50.00ml/千只鸡饮水。",
-  "feedMeterPrev": [
-    {
-      "quantity": 19400,
-      "label": "VK116/1069/4.26"
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>蛋鸡生产日报工具</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F5F5F5;
+      color: #333;
+      padding: 1rem;
+      margin: 0;
+      line-height: 1.6;
     }
-  ],
-  "feedIn": [
-    {
-      "quantity": 21830,
-      "label": "1069/4.29"
+    .container {
+      max-width: 100%;
+      margin: auto;
     }
-  ],
-  "feedMeterToday": [
-    {
-      "quantity": 20835,
-      "label": "1069/4.29"
+    .card {
+      background-color: #FFF;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 1rem;
     }
-  ],
-  "feedCompare": 0,
-  "additiveDaily": 0,
-  "totalFeed": 20395,
-  "avgFeed": 116.8,
-  "layRate": 85.1,
-  "eggPerHen": 49,
-  "feedEggRatio": 2.38,
-  "waterFeedRatio": 1.8,
-  "brokenRate": 1.04,
-  "boxWeight": 41.48,
-  "avgWater": 214.3
+    .card h2 {
+      color: #4CAF50;
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    .card h3 {
+      color: #2196F3;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+    .card h3 i {
+      margin-right: 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+      border: 1px solid #E0E0E0;
+    }
+    th {
+      color: #2196F3;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[readonly] {
+      background-color: #F5F5F5;
+    }
+    button {
+      background-color: #4CAF50;
+      color: #FFF;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 0.5rem;
+    }
+    .time-range {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .time-range input {
+      width: 45%;
+    }
+    .add-row-btn {
+      background-color: #2196F3;
+      margin-top: 0.5rem;
+      margin-right: 0.5rem;
+    }
+    .remove-row-btn {
+      background-color: #D32F2F;
+      margin-left: 0.5rem;
+    }
+    textarea {
+      height: 200px;
+      resize: vertical;
+    }
+    .averages {
+      margin-top: 1rem;
+      padding: 0.8rem;
+      background-color: #F9F9F9;
+      border-radius: 4px;
+    }
+    .averages p {
+      margin: 0.3rem 0;
+      font-size: 0.9rem;
+    }
+    @media (max-width: 600px) {
+      .card {
+        padding: 0.8rem;
+      }
+      table {
+        font-size: 0.8rem;
+      }
+      input, textarea {
+        font-size: 0.8rem;
+      }
+      button {
+        padding: 6px 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="container">
+  <div class="card" id="input">
+    <h2><i class="fas fa-keyboard"></i> 数据输入</h2>
+    <table>
+      <tr><th>日期</th><td><input type="date" id="date" oninput="calculate()"></td>
+          <th>栋号</th><td><input type="text" id="houseNumber" value="临猗2 栋"></td></tr>
+      <tr><th>品种</th><td><input type="text" id="breed" value="粉六"></td>
+          <th>日龄</th><td><input type="number" id="age" min="0" oninput="calculate()"></td></tr>
+      <tr><th>昨日存栏</th><td><input type="number" id="stockYesterday" min="0" oninput="calculate()"></td>
+          <th>死淘</th><td><input type="number" id="deadCount" min="0" oninput="calculate()"></td></tr>
+      <tr><th>今日存栏</th><td><input type="number" id="stockToday" readonly></td>
+          <th>收鸡蛋间</th><td>
+            <div class="time-range">
+              <input type="time" id="collectTimeStart" oninput="calculate()">
+              <span>-</span>
+              <input type="time" id="collectTimeEnd" oninput="calculate()">
+            </div>
+          </td></tr>
+      <tr><th>产蛋个数</th><td><input type="number" id="eggCount" min="0" oninput="calculate()"></td>
+          <th>产蛋斤数（斤）</th><td><input type="number" id="eggWeight" min="0" oninput="calculate()"></td></tr>
+      <tr><th>破蛋个数</th><td><input type="number" id="brokenEggs" min="0" oninput="calculate()"></td>
+          <th>日总饮水（t）</th><td><input type="number" id="waterTotal" min="0" step="0.1" oninput="calculate()"></td></tr>
+      <tr><th>光照</th><td><input type="text" id="lighting"></td>
+          <th>天气</th><td><input type="text" id="weather"></td></tr>
+      <tr><th>用药</th><td colspan="2"><input type="text" id="medication"></td></tr>
+    </table>
+    <h3><i class="fas fa-warehouse"></i> 料板块</h3>
+    <table id="feedTable">
+      <tr><th>昨日料表（kg）</th><td><input type="number" class="feedMeterPrev" min="0" oninput="calculate()"></td>
+          <th>标签</th><td><input type="text" class="feedMeterPrevLabel" value="VK116/1069/4.26"></td>
+          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
+      <tr><th>进料数（kg）</th><td><input type="number" class="feedIn" min="0" oninput="calculate()"></td>
+          <th>标签</th><td><input type="text" class="feedInLabel" value="VK116/1069/4.26"></td>
+          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
+      <tr><th>今日料表（kg）</th><td><input type="number" class="feedMeterToday" min="0" oninput="calculate()"></td>
+          <th>标签</th><td><input type="text" class="feedMeterTodayLabel" value="VK116/1069/4.26"></td>
+          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
+      <tr><th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td></tr>
+      <tr><th>添加剂日耗料（kg）</th><td><input type="number" id="additiveDaily" min="0" oninput="calculate()"></td></tr>
+    </table>
+    <button class="add-row-btn" onclick="addFeedRow('昨日料表')">+ 昨日料表</button>
+    <button class="add-row-btn" onclick="addFeedRow('进料数')">+ 进料数</button>
+    <button class="add-row-btn" onclick="addFeedRow('今日料表')">+ 今日料表</button>
+  </div>
+
+  <div class="card" id="results">
+    <h2><i class="fas fa-chart-bar"></i> 实时分析</h2>
+    <table>
+      <tr><th>日总采食（kg）</th><td><input type="number" id="totalFeed" readonly></td>
+          <th>日均采食（g）</th><td><input type="number" id="avgFeed" readonly> <span id="feedDiff"></span></td></tr>
+      <tr><th>产蛋率（%）</th><td><input type="number" id="layRate" readonly></td>
+          <th>只均产蛋量（g）</th><td><input type="number" id="eggPerHen" readonly></td></tr>
+      <tr><th>料蛋比</th><td><input type="number" id="feedEggRatio" readonly></td>
+          <th>水料比</th><td><input type="number" id="waterFeedRatio" readonly></td></tr>
+      <tr><th>破蛋率（%）</th><td><input type="number" id="brokenRate" readonly></td>
+          <th>箱重（斤）</th><td><input type="number" id="boxWeight" readonly></td></tr>
+      <tr><th>日均饮水（g）</th><td><input type="number" id="avgWater" readonly></td></tr>
+    </table>
+    <div class="averages" id="averages"></div>
+  </div>
+
+  <div class="card" id="report">
+    <h2><i class="fas fa-file-alt"></i> 日报输出</h2>
+    <button onclick="generateReport()">生成日报</button>
+    <button onclick="exportData()">导出数据</button>
+    <textarea id="reportText" readonly></textarea>
+  </div>
+</div>
+
+<script>
+function $(id) { return document.getElementById(id); }
+
+// 历史数据存储
+let history = JSON.parse(localStorage.getItem('eggFarmHistory')) || [];
+
+// 设置默认日期为当前日期
+window.onload = function() {
+  const today = new Date().toISOString().split('T')[0];
+  $('date').value = today;
+  calculate();
+};
+
+// 添加新的料板块行
+function addFeedRow(type) {
+  const table = $('feedTable');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <th>${type}（kg）</th>
+    <td><input type="number" class="${type === '昨日料表' ? 'feedMeterPrev' : type === '进料数' ? 'feedIn' : 'feedMeterToday'}" min="0" oninput="calculate()"></td>
+    <th>标签</th>
+    <td><input type="text" class="${type === '昨日料表' ? 'feedMeterPrevLabel' : type === '进料数' ? 'feedInLabel' : 'feedMeterTodayLabel'}" value="VK116/1069/4.26"></td>
+    <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td>
+  `;
+  table.appendChild(row);
 }
+
+// 删除行
+function removeRow(btn) {
+  const row = btn.parentNode.parentNode;
+  row.parentNode.removeChild(row);
+  calculate();
+}
+
+// 计算逻辑
+function calculate() {
+  // 计算今日存栏
+  const stockYesterday = parseFloat($('stockYesterday').value) || 0;
+  const deadCount = parseFloat($('deadCount').value) || 0;
+  const stockToday = stockYesterday - deadCount;
+  $('stockToday').value = stockToday >= 0 ? stockToday : 0;
+
+  // 计算料板块数据
+  const feedMeterPrevInputs = document.querySelectorAll('.feedMeterPrev');
+  const feedInInputs = document.querySelectorAll('.feedIn');
+  const feedMeterTodayInputs = document.querySelectorAll('.feedMeterToday');
+  const feedCompare = parseFloat($('feedCompare').value) || 0;
+  const additiveDaily = parseFloat($('additiveDaily').value) || 0;
+
+  let totalFeedMeterPrev = 0;
+  feedMeterPrevInputs.forEach(input => totalFeedMeterPrev += parseFloat(input.value) || 0);
+
+  let totalFeedIn = 0;
+  feedInInputs.forEach(input => totalFeedIn += parseFloat(input.value) || 0);
+
+  let totalFeedMeterToday = 0;
+  feedMeterTodayInputs.forEach(input => totalFeedMeterToday += parseFloat(input.value) || 0);
+
+  const totalFeed = totalFeedMeterPrev + totalFeedIn - totalFeedMeterToday + feedCompare + additiveDaily;
+  const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
+
+  // 计算与前日差值
+  let feedDiff = '（无前日数据）';
+  let deadDiff = '（无前日数据）';
+  if ($('date').value) {
+    const currentDate = new Date($('date').value);
+    const prevDate = new Date(currentDate);
+    prevDate.setDate(currentDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split('T')[0];
+    const prevEntry = history.find(h => h.date === prevDateStr);
+    if (prevEntry) {
+      const feedDifference = (avgFeed - prevEntry.avgFeed).toFixed(1);
+      feedDiff = `（${feedDifference >= 0 ? '+' : ''}${feedDifference}）`;
+      const deadDifference = deadCount - prevEntry.deadCount;
+      deadDiff = `（${deadDifference >= 0 ? '+' : ''}${deadDifference}）`;
+    }
+  }
+  $('feedDiff').textContent = feedDiff;
+
+  // 计算其他指标
+  const eggCount = parseFloat($('eggCount').value) || 0;
+  const eggWeight = parseFloat($('eggWeight').value) || 0;
+  const brokenEggs = parseFloat($('brokenEggs').value) || 0;
+  const waterTotal = parseFloat($('waterTotal').value) || 0;
+
+  const layRate = stockToday ? (eggCount / stockToday * 100).toFixed(1) : 0;
+  const eggPerHen = stockToday ? (eggWeight / stockToday * 1000).toFixed(1) : 0;
+  const feedEggRatio = eggPerHen ? (avgFeed / eggPerHen).toFixed(2) : 0;
+  const brokenRate = eggCount ? (brokenEggs / eggCount * 100).toFixed(2) : 0;
+  const boxWeight = eggCount ? (eggWeight / eggCount * 360 * 2).toFixed(2) : 0;
+  const avgWater = stockToday ? (waterTotal / stockToday * 1000000).toFixed(1) : 0;
+  const waterFeedRatio = avgFeed ? (avgWater / avgFeed).toFixed(1) : 0;
+
+  // 更新实时分析
+  $('totalFeed').value = totalFeed.toFixed(1);
+  $('avgFeed').value = avgFeed;
+  $('layRate').value = layRate;
+  $('eggPerHen').value = eggPerHen;
+  $('feedEggRatio').value = feedEggRatio;
+  $('waterFeedRatio').value = waterFeedRatio;
+  $('brokenRate').value = brokenRate;
+  $('boxWeight').value = boxWeight;
+  $('avgWater').value = avgWater;
+
+  // 更新历史数据
+  if ($('date').value) {
+    const entry = {
+      date: $('date').value,
+      avgFeed,
+      layRate,
+      eggPerHen,
+      feedEggRatio,
+      waterFeedRatio,
+      deadCount
+    };
+    history = history.filter(h => h.date !== entry.date);
+    history.push(entry);
+    history.sort((a, b) => new Date(a.date) - new Date(b.date));
+    localStorage.setItem('eggFarmHistory', JSON.stringify(history));
+    updateAverages();
+  }
+}
+
+// 计算七日平均值和周平均值
+function updateAverages() {
+  const days = history.length;
+  if (days === 0) {
+    $('averages').innerHTML = '<p>无历史数据</p>';
+    return;
+  }
+
+  const recentDays = days > 7 ? 7 : days;
+  const recentHistory = history.slice(-recentDays);
+  const avgFeed = (recentHistory.reduce((sum, h) => sum + parseFloat(h.avgFeed), 0) / recentDays).toFixed(1);
+  const avgLayRate = (recentHistory.reduce((sum, h) => sum + parseFloat(h.layRate), 0) / recentDays).toFixed(1);
+  const avgEggPerHen = (recentHistory.reduce((sum, h) => sum + parseFloat(h.eggPerHen), 0) / recentDays).toFixed(1);
+  const avgFeedEggRatio = (recentHistory.reduce((sum, h) => sum + parseFloat(h.feedEggRatio), 0) / recentDays).toFixed(2);
+  const avgWaterFeedRatio = (recentHistory.reduce((sum, h) => sum + parseFloat(h.waterFeedRatio), 0) / recentDays).toFixed(1);
+
+  const today = new Date();
+  const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
+  const weekHistory = history.filter(h => new Date(h.date) >= weekStart);
+  let weekAvgHtml = '';
+  if (weekHistory.length > 0) {
+    const weekAvgFeed = (weekHistory.reduce((sum, h) => sum + parseFloat(h.avgFeed), 0) / weekHistory.length).toFixed(1);
+    const weekAvgLayRate = (weekHistory.reduce((sum, h) => sum + parseFloat(h.layRate), 0) / weekHistory.length).toFixed(1);
+    const weekAvgEggPerHen = (weekHistory.reduce((sum, h) => sum + parseFloat(h.eggPerHen), 0) / weekHistory.length).toFixed(1);
+    const weekAvgFeedEggRatio = (weekHistory.reduce((sum, h) => sum + parseFloat(h.feedEggRatio), 0) / weekHistory.length).toFixed(2);
+    const weekAvgWaterFeedRatio = (weekHistory.reduce((sum, h) => sum + parseFloat(h.waterFeedRatio), 0) / weekHistory.length).toFixed(1);
+    weekAvgHtml = `
+      <p><strong>本周平均值（${weekHistory.length}天）</strong></p>
+      <p>日均采食：${weekAvgFeed} g</p>
+      <p>产蛋率：${weekAvgLayRate} %</p>
+      <p>只均产蛋量：${weekAvgEggPerHen} g</p>
+      <p>料蛋比：${weekAvgFeedEggRatio}</p>
+      <p>水料比：${weekAvgWaterFeedRatio}</p>
+    `;
+  } else {
+    weekAvgHtml = '<p>本周无数据</p>';
+  }
+
+  $('averages').innerHTML = `
+    <p><strong>最近${recentDays}天平均值</strong></p>
+    <p>日均采食：${avgFeed} g</p>
+    <p>产蛋率：${avgLayRate} %</p>
+    <p>只均产蛋量：${avgEggPerHen} g</p>
+    <p>料蛋比：${avgFeedEggRatio}</p>
+    <p>水料比：${avgWaterFeedRatio}</p>
+    ${weekAvgHtml}
+  `;
+}
+
+// 导出数据
+function exportData() {
+  const data = {
+    date: $('date').value,
+    houseNumber: $('houseNumber').value,
+    breed: $('breed').value,
+    age: $('age').value,
+    stockYesterday: parseFloat($('stockYesterday').value) || 0,
+    deadCount: parseFloat($('deadCount').value) || 0,
+    stockToday: parseFloat($('stockToday').value) || 0,
+    collectTimeStart: $('collectTimeStart').value,
+    collectTimeEnd: $('collectTimeEnd').value,
+    eggCount: parseFloat($('eggCount').value) || 0,
+    eggWeight: parseFloat($('eggWeight').value) || 0,
+    brokenEggs: parseFloat($('brokenEggs').value) || 0,
+    waterTotal: parseFloat($('waterTotal').value) || 0,
+    lighting: $('lighting').value,
+    weather: $('weather').value,
+    medication: $('medication').value,
+    feedMeterPrev: Array.from(document.querySelectorAll('.feedMeterPrev')).map((input, i) => ({
+      quantity: parseFloat(input.value) || 0,
+      label: document.querySelectorAll('.feedMeterPrevLabel')[i].value
+    })),
+    feedIn: Array.from(document.querySelectorAll('.feedIn')).map((input, i) => ({
+      quantity: parseFloat(input.value) || 0,
+      label: document.querySelectorAll('.feedInLabel')[i].value
+    })),
+    feedMeterToday: Array.from(document.querySelectorAll('.feedMeterToday')).map((input, i) => ({
+      quantity: parseFloat(input.value) || 0,
+      label: document.querySelectorAll('.feedMeterTodayLabel')[i].value
+    })),
+    feedCompare: parseFloat($('feedCompare').value) || 0,
+    additiveDaily: parseFloat($('additiveDaily').value) || 0,
+    totalFeed: parseFloat($('totalFeed').value) || 0,
+    avgFeed: parseFloat($('avgFeed').value) || 0,
+    layRate: parseFloat($('layRate').value) || 0,
+    eggPerHen: parseFloat($('eggPerHen').value) || 0,
+    feedEggRatio: parseFloat($('feedEggRatio').value) || 0,
+    waterFeedRatio: parseFloat($('waterFeedRatio').value) || 0,
+    brokenRate: parseFloat($('brokenRate').value) || 0,
+    boxWeight: parseFloat($('boxWeight').value) || 0,
+    avgWater: parseFloat($('avgWater').value) || 0
+  };
+
+  const jsonStr = JSON.stringify(data, null, 2);
+  const blob = new Blob([jsonStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `egg_farm_data_${$('date').value || new Date().toISOString().split('T')[0]}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+// 生成日报
+function generateReport() {
+  const date = new Date($('date').value);
+  const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
+  const houseNumber = $('houseNumber').value || '未知';
+  const breed = $('breed').value || '未知';
+  const age = $('age').value || '未知';
+  const stockToday = parseFloat($('stockToday').value) || 0;
+  const deadCount = parseFloat($('deadCount').value) || 0;
+  const collectTimeStart = $('collectTimeStart').value.replace(':', '.');
+  const collectTimeEnd = $('collectTimeEnd').value.replace(':', '.');
+  const collectTime = `${collectTimeStart}--${collectTimeEnd}` || '未知';
+  const eggCount = parseFloat($('eggCount').value) || 0;
+  const eggWeight = parseFloat($('eggWeight').value) || 0;
+  const brokenEggs = parseFloat($('brokenEggs').value) || 0;
+  const waterTotal = parseFloat($('waterTotal').value) || 0;
+  const lighting = $('lighting').value || '未知';
+  const weather = $('weather').value || '未知';
+  const medication = $('medication').value || '未知';
+  const totalFeed = parseFloat($('totalFeed').value) || 0;
+  const avgFeed = parseFloat($('avgFeed').value) || 0;
+  const layRate = parseFloat($('layRate').value) || 0;
+  const eggPerHen = parseFloat($('eggPerHen').value) || 0;
+  const feedEggRatio = parseFloat($('feedEggRatio').value) || 0;
+  const waterFeedRatio = parseFloat($('waterFeedRatio').value) || 0;
+  const brokenRate = parseFloat($('brokenRate').value) || 0;
+  const boxWeight = parseFloat($('boxWeight').value) || 0;
+  const avgWater = parseFloat($('avgWater').value) || 0;
+
+  let feedDiff = '（无前日数据）';
+  let deadDiff = '（无前日数据）';
+  if ($('date').value) {
+    const currentDate = new Date($('date').value);
+    const prevDate = new Date(currentDate);
+    prevDate.setDate(currentDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split('T')[0];
+    const prevEntry = history.find(h => h.date === prevDateStr);
+    if (prevEntry) {
+      const feedDifference = (avgFeed - prevEntry.avgFeed).toFixed(1);
+      feedDiff = `（${feedDifference >= 0 ? '+' : ''}${feedDifference}）`;
+      const deadDifference = deadCount - prevEntry.deadCount;
+      deadDiff = `（${deadDifference >= 0 ? '+' : ''}${deadDifference}）`;
+    }
+  }
+
+  // 计算耗料量并按标签分配
+  const feedMeterPrevData = Array.from(document.querySelectorAll('.feedMeterPrev')).map((input, i) => ({
+    quantity: parseFloat(input.value) || 0,
+    label: document.querySelectorAll('.feedMeterPrevLabel')[i].value
+  }));
+  const feedInData = Array.from(document.querySelectorAll('.feedIn')).map((input, i) => ({
+    quantity: parseFloat(input.value) || 0,
+    label: document.querySelectorAll('.feedInLabel')[i].value
+  }));
+  const feedMeterTodayData = Array.from(document.querySelectorAll('.feedMeterToday')).map((input, i) => ({
+    quantity: parseFloat(input.value) || 0,
+    label: document.querySelectorAll('.feedMeterTodayLabel')[i].value
+  }));
+
+  // 按时间顺序合并昨日料表和进料数
+  const allFeed = [...feedMeterPrevData, ...feedInData];
+  let remainingConsumption = totalFeed; // 总耗料量
+  const consumptionByLabel = {};
+
+  // 按标签分配耗料量
+  allFeed.forEach(feed => {
+    const label = feed.label;
+    const quantity = feed.quantity;
+    if (remainingConsumption <= 0) return;
+
+    const consumed = Math.min(quantity, remainingConsumption);
+    if (!consumptionByLabel[label]) {
+      consumptionByLabel[label] = 0;
+    }
+    consumptionByLabel[label] += consumed;
+    remainingConsumption -= consumed;
+  });
+
+  // 格式化耗料标签
+  const feedLabelData = Object.entries(consumptionByLabel).map(([label, qty]) => {
+    if (qty > 0) {
+      return `${label}（${qty.toFixed(1)}）`;
+    }
+    return null;
+  }).filter(item => item);
+  const feedLabelText = feedLabelData.length > 0 ? `饲料标签：\nVK116\n${feedLabelData.join('\n')}` : '饲料标签：\nVK116';
+
+  const report = `${houseNumber}
+日期：${dateStr}
+${feedLabelText}
+品种:${breed}
+日龄:${age}
+存栏:${stockToday}
+死淘:${deadCount}${deadDiff}
+日总采食:${totalFeed.toFixed(0)}
+日均采食:${avgFeed}${feedDiff}
+产蛋个数:${eggCount}
+产蛋率:${layRate}
+收鸡蛋间:${collectTime}
+料蛋比：${feedEggRatio}
+产蛋斤数:${eggWeight.toFixed(2)}
+只均产蛋量：${eggPerHen}
+破蛋个数:${brokenEggs}
+破蛋率:${brokenRate}
+箱重：${boxWeight}
+总饮水:${waterTotal.toFixed(2)}
+日均饮水：${avgWater}
+光照 ${lighting}
+天气：${weather}
+用药:${medication}`.trim();
+
+  $('reportText').value = report;
+}
+</script>
+</body>
+</html>
