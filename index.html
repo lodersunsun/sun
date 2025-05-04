@@ -247,6 +247,7 @@ function calculate() {
   let totalFeedMeterToday = 0;
   feedMeterTodayInputs.forEach(input => totalFeedMeterToday += parseFloat(input.value) || 0);
 
+  // 计算总采食（包含对比耗料和添加剂日耗料）
   const totalFeed = totalFeedMeterPrev + totalFeedIn - totalFeedMeterToday + feedCompare + additiveDaily;
   const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
 
@@ -460,7 +461,7 @@ function generateReport() {
     }
   }
 
-  // 计算耗料量并按标签分配
+  // 计算耗料量（仅包含昨日料表、进料数、今日料表，不包含对比耗料和添加剂日耗料）
   const feedMeterPrevData = Array.from(document.querySelectorAll('.feedMeterPrev')).map((input, i) => ({
     quantity: parseFloat(input.value) || 0,
     label: document.querySelectorAll('.feedMeterPrevLabel')[i].value
@@ -474,9 +475,21 @@ function generateReport() {
     label: document.querySelectorAll('.feedMeterTodayLabel')[i].value
   }));
 
+  let totalFeedMeterPrev = 0;
+  feedMeterPrevData.forEach(item => totalFeedMeterPrev += item.quantity);
+
+  let totalFeedIn = 0;
+  feedInData.forEach(item => totalFeedIn += item.quantity);
+
+  let totalFeedMeterToday = 0;
+  feedMeterTodayData.forEach(item => totalFeedMeterToday += item.quantity);
+
+  // 仅用于“饲料标签”的基础耗料量
+  const baseConsumption = totalFeedMeterPrev + totalFeedIn - totalFeedMeterToday;
+
   // 按时间顺序合并昨日料表和进料数
   const allFeed = [...feedMeterPrevData, ...feedInData];
-  let remainingConsumption = totalFeed; // 总耗料量
+  let remainingConsumption = baseConsumption; // 基础耗料量
   const consumptionByLabel = {};
 
   // 按标签分配耗料量
