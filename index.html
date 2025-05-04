@@ -6,98 +6,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #F5F5F5;
-      color: #333;
-      padding: 1rem;
-      margin: 0;
-    }
-    .container {
-      max-width: 100%;
-      margin: auto;
-    }
-    .card {
-      background-color: #FFF;
-      border-radius: 8px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-      padding: 1rem;
-      margin-bottom: 1rem;
-    }
-    .card h2 {
-      color: #4CAF50;
-      margin-top: 0;
-      font-size: 1.2rem;
-    }
-    .card h3 {
-      color: #2196F3;
-      font-size: 1.1rem;
-    }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.9rem;
-    }
-    th, td {
-      padding: 6px;
-      text-align: left;
-      border: 1px solid #E0E0E0;
-    }
-    th {
-      color: #2196F3;
-      font-weight: 600;
-    }
-    input {
-      width: 100%;
-      padding: 5px;
-      border: 1px solid #E0E0E0;
-      border-radius: 4px;
-      box-sizing: border-box;
-    }
-    input[readonly] {
-      background-color: #F5F5F5;
-    }
-    button {
-      background-color: #4CAF50;
-      color: #FFF;
-      border: none;
-      padding: 8px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .time-range {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-    .time-range input {
-      width: 45%;
-    }
-    .averages {
-      margin-top: 1rem;
-      padding: 0.8rem;
-      background-color: #F9F9F9;
-      border-radius: 4px;
-    }
-    @media (max-width: 600px) {
-      .card {
-        padding: 0.8rem;
-      }
-      table {
-        font-size: 0.8rem;
-      }
-      input {
-        font-size: 0.8rem;
-      }
-      button {
-        padding: 6px 10px;
-      }
+    body { font-family: Arial, sans-serif; background-color: #F5F5F5; color: #333; padding: 1rem; margin: 0; }
+    .container { max-width: 100%; margin: auto; }
+    .card { background-color: #FFF; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 1rem; margin-bottom: 1rem; }
+    .card h2 { color: #4CAF50; margin-top: 0; font-size: 1.2rem; }
+    .card h3 { color: #2196F3; font-size: 1.1rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { padding: 6px; text-align: left; border: 1px solid #E0E0E0; }
+    th { color: #2196F3; font-weight: 600; }
+    input { width: 100%; padding: 5px; border: 1px solid #E0E0E0; border-radius: 4px; box-sizing: border-box; }
+    input[readonly] { background-color: #F5F5F5; }
+    button { background-color: #4CAF50; color: #FFF; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+    .time-range { display: flex; align-items: center; gap: 0.5rem; }
+    .time-range input { width: 45%; }
+    .add-row-btn { background-color: #2196F3; margin-top: 0.5rem; }
+    .remove-row-btn { background-color: #D32F2F; margin-left: 0.5rem; }
+    @media (max-width: 600px) { 
+      .card { padding: 0.8rem; } 
+      table { font-size: 0.8rem; } 
+      input { font-size: 0.8rem; } 
+      button { padding: 6px 10px; } 
     }
   </style>
 </head>
 <body>
 <div class="container">
-  <!-- 数据输入模块 -->
   <div class="card" id="input">
     <h2><i class="fas fa-keyboard"></i> 数据输入</h2>
     <table>
@@ -116,19 +49,22 @@
           <th>产蛋斤数（斤）</th><td><input type="number" id="eggWeight" min="0" oninput="calculate()"></td></tr>
     </table>
     <h3>料板块</h3>
-    <table>
-      <tr><th>昨日料表（kg）</th><td><input type="number" id="feedMeterPrev" min="0" oninput="calculate()"></td>
-          <th>昨日料表标签</th><td><input type="text" id="feedMeterPrevLabel"></td></tr>
-      <tr><th>进料数（kg）</th><td><input type="number" id="feedIn" min="0" oninput="calculate()"></td>
-          <th>进料数标签</th><td><input type="text" id="feedInLabel"></td></tr>
-      <tr><th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td>
-          <th>今日料表标签</th><td><input type="text" id="feedMeterTodayLabel"></td></tr>
-      <tr><th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td>
-          <th>添加剂日耗料（kg）</th><td><input type="number" id="additiveDaily" min="0" oninput="calculate()"></td></tr>
+    <table id="feedTable">
+      <tr><th>昨日料表（kg）</th><td><input type="number" class="feedMeterPrev" min="0" oninput="calculate()"></td>
+          <th>标签</th><td><input type="text" class="feedMeterPrevLabel" value="VK116/1069/4.26"></td>
+          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
+      <tr><th>进料数（kg）</th><td><input type="number" class="feedIn" min="0" oninput="calculate()"></td>
+          <th>标签</th><td><input type="text" class="feedInLabel" value="VK116/1069/4.26"></td>
+          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
+      <tr><th>今日料表（kg）</th><td><input type="number" class="feedMeterToday" min="0" oninput="calculate()"></td>
+          <th>标签</th><td><input type="text" class="feedMeterTodayLabel" value="VK116/1069/4.26"></td>
+          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
     </table>
+    <button class="add-row-btn" onclick="addFeedRow('昨日料表')">+ 昨日料表</button>
+    <button class="add-row-btn" onclick="addFeedRow('进料数')">+ 进料数</button>
+    <button class="add-row-btn" onclick="addFeedRow('今日料表')">+ 今日料表</button>
   </div>
 
-  <!-- 实时分析模块 -->
   <div class="card" id="results">
     <h2><i class="fas fa-chart-bar"></i> 实时分析</h2>
     <table>
@@ -137,10 +73,8 @@
       <tr><th>产蛋率（%）</th><td><input type="number" id="layRate" readonly></td>
           <th>只均产蛋量（g）</th><td><input type="number" id="eggPerHen" readonly></td></tr>
     </table>
-    <div class="averages" id="averages"></div>
   </div>
 
-  <!-- 日报输出模块 -->
   <div class="card" id="report">
     <h2><i class="fas fa-file-alt"></i> 日报输出</h2>
     <button onclick="generateReport()">生成日报</button>
@@ -149,101 +83,61 @@
 </div>
 
 <script>
-// 快捷获取 DOM 元素
 function $(id) { return document.getElementById(id); }
 
-// 历史数据存储
-let history = JSON.parse(localStorage.getItem('eggFarmHistory')) || [];
+// 添加新的料板块行
+function addFeedRow(type) {
+  const table = $('feedTable');
+  const row = document.createElement('tr');
+  row.innerHTML = `
+    <th>${type}（kg）</th>
+    <td><input type="number" class="${type === '昨日料表' ? 'feedMeterPrev' : type === '进料数' ? 'feedIn' : 'feedMeterToday'}" min="0" oninput="calculate()"></td>
+    <th>标签</th>
+    <td><input type="text" class="${type === '昨日料表' ? 'feedMeterPrevLabel' : type === '进料数' ? 'feedInLabel' : 'feedMeterTodayLabel'}" value="VK116/1069/4.26"></td>
+    <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td>
+  `;
+  table.appendChild(row);
+}
+
+// 删除行
+function removeRow(btn) {
+  const row = btn.parentNode.parentNode;
+  row.parentNode.removeChild(row);
+  calculate();
+}
 
 // 计算逻辑
 function calculate() {
-  // 计算今日存栏
   const stockYesterday = parseFloat($('stockYesterday').value) || 0;
   const deadCount = parseFloat($('deadCount').value) || 0;
   const stockToday = stockYesterday - deadCount;
   $('stockToday').value = stockToday >= 0 ? stockToday : 0;
 
-  // 获取料板块数据
-  const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
-  const feedIn = parseFloat($('feedIn').value) || 0;
-  const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
-  const feedCompare = parseFloat($('feedCompare').value) || 0;
-  const additiveDaily = parseFloat($('additiveDaily').value) || 0;
+  const feedMeterPrevInputs = document.querySelectorAll('.feedMeterPrev');
+  const feedInInputs = document.querySelectorAll('.feedIn');
+  const feedMeterTodayInputs = document.querySelectorAll('.feedMeterToday');
 
-  // 计算日总采食
-  const totalFeed = feedMeterPrev + feedIn - feedMeterToday + feedCompare + additiveDaily;
+  let totalFeedMeterPrev = 0;
+  feedMeterPrevInputs.forEach(input => totalFeedMeterPrev += parseFloat(input.value) || 0);
+
+  let totalFeedIn = 0;
+  feedInInputs.forEach(input => totalFeedIn += parseFloat(input.value) || 0);
+
+  let totalFeedMeterToday = 0;
+  feedMeterTodayInputs.forEach(input => totalFeedMeterToday += parseFloat(input.value) || 0);
+
+  const totalFeed = totalFeedMeterPrev + totalFeedIn - totalFeedMeterToday;
   const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
 
-  // 计算产蛋相关指标
   const eggCount = parseFloat($('eggCount').value) || 0;
   const eggWeight = parseFloat($('eggWeight').value) || 0;
   const layRate = stockToday ? (eggCount / stockToday * 100).toFixed(1) : 0;
   const eggPerHen = stockToday ? (eggWeight / stockToday * 1000).toFixed(1) : 0;
 
-  // 更新实时分析
   $('totalFeed').value = totalFeed.toFixed(1);
   $('avgFeed').value = avgFeed;
   $('layRate').value = layRate;
   $('eggPerHen').value = eggPerHen;
-
-  // 更新历史数据
-  if ($('date').value) {
-    const entry = {
-      date: $('date').value,
-      avgFeed,
-      layRate,
-      eggPerHen
-    };
-    history = history.filter(h => h.date !== entry.date);
-    history.push(entry);
-    history.sort((a, b) => new Date(a.date) - new Date(b.date));
-    if (history.length > 7) history.shift();
-    localStorage.setItem('eggFarmHistory', JSON.stringify(history));
-    updateAverages();
-  }
-}
-
-// 计算平均值
-function updateAverages() {
-  const days = history.length;
-  if (days === 0) {
-    $('averages').innerHTML = '<p>无历史数据</p>';
-    return;
-  }
-
-  // 滚动平均（最近7天或现有天数）
-  const recentDays = days > 7 ? 7 : days;
-  const recentHistory = history.slice(-recentDays);
-  const avgFeed = (recentHistory.reduce((sum, h) => sum + parseFloat(h.avgFeed), 0) / recentDays).toFixed(1);
-  const avgLayRate = (recentHistory.reduce((sum, h) => sum + parseFloat(h.layRate), 0) / recentDays).toFixed(1);
-  const avgEggPerHen = (recentHistory.reduce((sum, h) => sum + parseFloat(h.eggPerHen), 0) / recentDays).toFixed(1);
-
-  // 周平均（周一到周日）
-  const today = new Date();
-  const weekStart = new Date(today.setDate(today.getDate() - today.getDay()));
-  const weekHistory = history.filter(h => new Date(h.date) >= weekStart);
-  let weekAvgHtml = '';
-  if (weekHistory.length > 0) {
-    const weekAvgFeed = (weekHistory.reduce((sum, h) => sum + parseFloat(h.avgFeed), 0) / weekHistory.length).toFixed(1);
-    const weekAvgLayRate = (weekHistory.reduce((sum, h) => sum + parseFloat(h.layRate), 0) / weekHistory.length).toFixed(1);
-    const weekAvgEggPerHen = (weekHistory.reduce((sum, h) => sum + parseFloat(h.eggPerHen), 0) / weekHistory.length).toFixed(1);
-    weekAvgHtml = `
-      <p><strong>本周平均值（${weekHistory.length}天）</strong></p>
-      <p>日均采食：${weekAvgFeed} g</p>
-      <p>产蛋率：${weekAvgLayRate} %</p>
-      <p>只均产蛋量：${weekAvgEggPerHen} g</p>
-    `;
-  } else {
-    weekAvgHtml = '<p>本周无数据</p>';
-  }
-
-  $('averages').innerHTML = `
-    <p><strong>最近${recentDays}天平均值</strong></p>
-    <p>日均采食：${avgFeed} g</p>
-    <p>产蛋率：${avgLayRate} %</p>
-    <p>只均产蛋量：${avgEggPerHen} g</p>
-    ${weekAvgHtml}
-  `;
 }
 
 // 生成日报
@@ -251,14 +145,6 @@ function generateReport() {
   const date = new Date($('date').value);
   const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
   const stockToday = parseFloat($('stockToday').value) || 0;
-  const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
-  const feedMeterPrevLabel = $('feedMeterPrevLabel').value || '未知';
-  const feedIn = parseFloat($('feedIn').value) || 0;
-  const feedInLabel = $('feedInLabel').value || '未知';
-  const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
-  const feedMeterTodayLabel = $('feedMeterTodayLabel').value || '未知';
-  const feedCompare = parseFloat($('feedCompare').value) || 0;
-  const additiveDaily = parseFloat($('additiveDaily').value) || 0;
   const collectTime = `${$('collectTimeStart').value}-${$('collectTimeEnd').value}` || '未知';
   const eggCount = parseFloat($('eggCount').value) || 0;
   const eggWeight = parseFloat($('eggWeight').value) || 0;
@@ -267,14 +153,25 @@ function generateReport() {
   const layRate = parseFloat($('layRate').value) || 0;
   const eggPerHen = parseFloat($('eggPerHen').value) || 0;
 
+  const feedMeterPrevData = Array.from(document.querySelectorAll('.feedMeterPrev')).map((input, i) => {
+    const label = document.querySelectorAll('.feedMeterPrevLabel')[i].value;
+    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
+  }).join(', ');
+  const feedInData = Array.from(document.querySelectorAll('.feedIn')).map((input, i) => {
+    const label = document.querySelectorAll('.feedInLabel')[i].value;
+    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
+  }).join(', ');
+  const feedMeterTodayData = Array.from(document.querySelectorAll('.feedMeterToday')).map((input, i) => {
+    const label = document.querySelectorAll('.feedMeterTodayLabel')[i].value;
+    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
+  }).join(', ');
+
   const report = `蛋鸡生产日报
 日期：${dateStr}
 存栏：${stockToday}
-昨日料表（kg）：${feedMeterPrev.toFixed(1)} (${feedMeterPrevLabel})
-进料数（kg）：${feedIn.toFixed(1)} (${feedInLabel})
-今日料表（kg）：${feedMeterToday.toFixed(1)} (${feedMeterTodayLabel})
-对比耗料（kg）：${feedCompare.toFixed(1)}
-添加剂日耗料（kg）：${additiveDaily.toFixed(1)}
+昨日料表（kg）：${feedMeterPrevData || '0'}
+进料数（kg）：${feedInData || '0'}
+今日料表（kg）：${feedMeterTodayData || '0'}
 收蛋时间：${collectTime}
 产蛋个数：${eggCount}
 产蛋斤数（斤）：${eggWeight.toFixed(1)}
