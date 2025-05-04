@@ -17,7 +17,7 @@
       line-height: 1.6;
     }
     .container {
-      max-width: 900px;
+      max-width: 100%;
       margin: auto;
     }
     .navbar {
@@ -69,6 +69,7 @@
     th, td {
       padding: 6px;
       text-align: left;
+      border: 1px solid #E0E0E0;
     }
     th {
       color: #2196F3;
@@ -135,7 +136,7 @@
       gap: 0.5rem;
     }
     .time-range input {
-      width: 48%;
+      width: 45%;
     }
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(10px); }
@@ -203,15 +204,21 @@
     <h2><i class="fas fa-keyboard"></i> 数据输入</h2>
     <table>
       <tr><th>日期</th><td><input type="date" id="date" oninput="calculate()"></td>
-          <th>饲料标签</th><td><input type="text" id="feedLabel" list="feedLabelList" oninput="calculate(); updateFeedLabels()"></td></tr>
+          <th>饲料标签</th><td><input type="text" id="feedLabel" list="feedLabelList" oninput="calculate()"></td></tr>
+      <tr><th></th><td colspan="3"><button onclick="addFeedLabel()">添加饲料标签</button></td></tr>
       <tr><th>日龄</th><td><input type="number" id="age" min="0" oninput="calculate()"></td>
           <th>昨日存栏</th><td><input type="number" id="stockYesterday" min="0" oninput="calculate()"></td></tr>
       <tr><th>死淘</th><td><input type="number" id="deadCount" min="0" oninput="calculate()"></td>
           <th>今日存栏</th><td><input type="number" id="stockToday" readonly></td></tr>
       <tr><th>昨日料表（kg）</th><td><input type="number" id="feedMeterPrev" min="0" oninput="calculate()"></td>
-          <th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td></tr>
+          <th>昨日料表标签</th><td><input type="text" id="feedMeterPrevLabel"></td></tr>
+      <tr><th>进料数（kg）</th><td><input type="number" id="feedIn" min="0" oninput="calculate()"></td>
+          <th>进料数标签</th><td><input type="text" id="feedInLabel"></td></tr>
+      <tr><th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td>
+          <th>今日料表标签</th><td><input type="text" id="feedMeterTodayLabel"></td></tr>
       <tr><th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td>
-          <th>收蛋时间</th><td>
+          <th>添加剂日耗料（kg）</th><td><input type="number" id="additiveDaily" min="0" oninput="calculate()"></td></tr>
+      <tr><th>收蛋时间</th><td colspan="3">
             <div class="time-range">
               <input type="time" id="collectTimeStart" oninput="calculate()">
               <span>-</span>
@@ -280,8 +287,8 @@ function initFeedLabels() {
   $('feedLabel').value = feedLabels[0];
 }
 
-// 更新饲料标签
-function updateFeedLabels() {
+// 添加饲料标签
+function addFeedLabel() {
   const newLabel = $('feedLabel').value.trim();
   if (newLabel && !feedLabels.includes(newLabel)) {
     feedLabels.push(newLabel);
@@ -302,18 +309,21 @@ function calculate() {
 
   // 获取输入值
   const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
+  const feedIn = parseFloat($('feedIn').value) || 0;
   const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
+  const feedCompare = parseFloat($('feedCompare').value) || 0;
+  const additiveDaily = parseFloat($('additiveDaily').value) || 0;
   const eggCount = parseFloat($('eggCount').value) || 0;
   const eggWeight = parseFloat($('eggWeight').value) || 0;
   const brokenEggs = parseFloat($('brokenEggs').value) || 0;
   const waterTotal = parseFloat($('waterTotal').value) || 0;
 
   // 计算指标
-  const totalFeed = feedMeterPrev - feedMeterToday;
+  const totalFeed = feedMeterPrev + feedIn - feedMeterToday + feedCompare + additiveDaily;
   const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
   const layRate = stockToday ? (eggCount / stockToday * 100).toFixed(1) : 0;
   const eggPerHen = stockToday ? (eggWeight / stockToday * 1000).toFixed(1) : 0;
-  const brokenRate = eggCount ? (brokenEggs / eggCount * 100).toFixed(1) : 0;
+  const brokenRate = eggCount ? (brokenEggs / eggCount * 100).toFixed(2) : 0;
   const boxWeight = eggCount ? (eggWeight / eggCount * 360 * 2).toFixed(2) : 0;
   const avgWater = stockToday ? (waterTotal / stockToday * 1000000).toFixed(1) : 0;
   const feedEggRatio = eggPerHen ? (avgFeed / eggPerHen).toFixed(2) : 0;
@@ -401,12 +411,16 @@ function generateReport() {
   const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
   const feedLabel = $('feedLabel').value || '未知';
   const age = $('age').value || '未知';
-  const stockYesterday = parseFloat($('stockYesterday').value) || 0;
   const deadCount = parseFloat($('deadCount').value) || 0;
   const stockToday = parseFloat($('stockToday').value) || 0;
   const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
+  const feedMeterPrevLabel = $('feedMeterPrevLabel').value || '未知';
+  const feedIn = parseFloat($('feedIn').value) || 0;
+  const feedInLabel = $('feedInLabel').value || '未知';
   const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
+  const feedMeterTodayLabel = $('feedMeterTodayLabel').value || '未知';
   const feedCompare = parseFloat($('feedCompare').value) || 0;
+  const additiveDaily = parseFloat($('additiveDaily').value) || 0;
   const collectTimeStart = $('collectTimeStart').value;
   const collectTimeEnd = $('collectTimeEnd').value;
   const collectTime = collectTimeStart && collectTimeEnd ? `${collectTimeStart}-${collectTimeEnd}` : '未知';
@@ -428,12 +442,13 @@ function generateReport() {
 日期：${dateStr}
 饲料标签：${feedLabel}
 日龄：${age}
-昨日存栏：${stockYesterday}
+存栏：${stockToday}
 死淘：${deadCount}
-今日存栏：${stockToday}
-昨日料表（kg）：${feedMeterPrev.toFixed(1)}
-今日料表（kg）：${feedMeterToday.toFixed(1)}
+昨日料表（kg）：${feedMeterPrev.toFixed(1)} (${feedMeterPrevLabel})
+进料数（kg）：${feedIn.toFixed(1)} (${feedInLabel})
+今日料表（kg）：${feedMeterToday.toFixed(1)} (${feedMeterTodayLabel})
 对比耗料（kg）：${feedCompare.toFixed(1)}
+添加剂日耗料（kg）：${additiveDaily.toFixed(1)}
 收蛋时间：${collectTime}
 产蛋个数：${eggCount}
 产蛋斤数（斤）：${eggWeight.toFixed(1)}
