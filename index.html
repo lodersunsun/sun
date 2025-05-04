@@ -6,28 +6,96 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <style>
-    body { font-family: Arial, sans-serif; background-color: #F5F5F5; color: #333; padding: 1rem; margin: 0; }
-    .container { max-width: 100%; margin: auto; }
-    .card { background-color: #FFF; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); padding: 1rem; margin-bottom: 1rem; }
-    .card h2 { color: #4CAF50; margin-top: 0; font-size: 1.2rem; }
-    .card h3 { color: #2196F3; font-size: 1.1rem; display: flex; align-items: center; }
-    .card h3 i { margin-right: 0.5rem; }
-    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
-    th, td { padding: 6px; text-align: left; border: 1px solid #E0E0E0; }
-    th { color: #2196F3; font-weight: 600; }
-    input, textarea { width: 100%; padding: 5px; border: 1px solid #E0E0E0; border-radius: 4px; box-sizing: border-box; }
-    input[readonly] { background-color: #F5F5F5; }
-    button { background-color: #4CAF50; color: #FFF; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-    .time-range { display: flex; align-items: center; gap: 0.5rem; }
-    .time-range input { width: 45%; }
-    .add-row-btn { background-color: #2196F3; margin-top: 0.5rem; }
-    .remove-row-btn { background-color: #D32F2F; margin-left: 0.5rem; }
-    textarea { height: 100px; resize: vertical; }
-    @media (max-width: 600px) { 
-      .card { padding: 0.8rem; } 
-      table { font-size: 0.8rem; } 
-      input, textarea { font-size: 0.8rem; } 
-      button { padding: 6px 10px; } 
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #F5F5F5;
+      color: #333;
+      padding: 1rem;
+      margin: 0;
+      line-height: 1.6;
+    }
+    .container {
+      max-width: 100%;
+      margin: auto;
+    }
+    .card {
+      background-color: #FFF;
+      border-radius: 8px;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .card h2 {
+      color: #4CAF50;
+      margin-top: 0;
+      font-size: 1.2rem;
+    }
+    .card h3 {
+      color: #2196F3;
+      font-size: 1.1rem;
+      display: flex;
+      align-items: center;
+    }
+    .card h3 i {
+      margin-right: 0.5rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+    th, td {
+      padding: 6px;
+      text-align: left;
+      border: 1px solid #E0E0E0;
+    }
+    th {
+      color: #2196F3;
+      font-weight: 600;
+    }
+    input, textarea {
+      width: 100%;
+      padding: 5px;
+      border: 1px solid #E0E0E0;
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    input[readonly] {
+      background-color: #F5F5F5;
+    }
+    button {
+      background-color: #4CAF50;
+      color: #FFF;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .time-range {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .time-range input {
+      width: 45%;
+    }
+    textarea {
+      height: 100px;
+      resize: vertical;
+    }
+    @media (max-width: 600px) {
+      .card {
+        padding: 0.8rem;
+      }
+      table {
+        font-size: 0.8rem;
+      }
+      input, textarea {
+        font-size: 0.8rem;
+      }
+      button {
+        padding: 6px 10px;
+      }
     }
   </style>
 </head>
@@ -36,15 +104,14 @@
   <div class="card" id="input">
     <h2><i class="fas fa-keyboard"></i> 数据输入</h2>
     <table>
-      <tr><th>栋号</th><td><input type="text" id="houseNumber" value="临猗2 栋"></td>
-          <th>日期</th><td><input type="date" id="date" oninput="calculate()"></td></tr>
-      <tr><th>饲料标签</th><td><input type="text" id="feedLabel" value="VK116 1069/4.26"></td>
-          <th>品种</th><td><input type="text" id="breed" value="粉六"></td></tr>
-      <tr><th>日龄</th><td><input type="number" id="age" min="0" oninput="calculate()"></td>
-          <th>昨日存栏</th><td><input type="number" id="stockYesterday" min="0" oninput="calculate()"></td></tr>
-      <tr><th>死淘</th><td><input type="number" id="deadCount" min="0" oninput="calculate()"></td>
-          <th>今日存栏</th><td><input type="number" id="stockToday" readonly></td></tr>
-      <tr><th>收鸡蛋间</th><td colspan="3">
+      <tr><th>日期</th><td><input type="date" id="date" oninput="calculate()"></td>
+          <th>栋号</th><td><input type="text" id="houseNumber" value="临猗2 栋"></td></tr>
+      <tr><th>品种</th><td><input type="text" id="breed" value="粉六"></td>
+          <th>日龄</th><td><input type="number" id="age" min="0" oninput="calculate()"></td></tr>
+      <tr><th>昨日存栏</th><td><input type="number" id="stockYesterday" min="0" oninput="calculate()"></td>
+          <th>死淘</th><td><input type="number" id="deadCount" min="0" oninput="calculate()"></td></tr>
+      <tr><th>今日存栏</th><td><input type="number" id="stockToday" readonly></td>
+          <th>收鸡蛋间</th><td>
             <div class="time-range">
               <input type="time" id="collectTimeStart" oninput="calculate()">
               <span>-</span>
@@ -57,23 +124,16 @@
           <th>日总饮水（t）</th><td><input type="number" id="waterTotal" min="0" step="0.1" oninput="calculate()"></td></tr>
       <tr><th>光照</th><td><input type="text" id="lighting"></td>
           <th>天气</th><td><input type="text" id="weather"></td></tr>
-      <tr><th>用药</th><td colspan="3"><input type="text" id="medication"></td></tr>
+      <tr><th>用药</th><td colspan="2"><input type="text" id="medication"></td></tr>
     </table>
     <h3><i class="fas fa-warehouse"></i> 料板块</h3>
     <table id="feedTable">
-      <tr><th>昨日料表（kg）</th><td><input type="number" class="feedMeterPrev" min="0" oninput="calculate()"></td>
-          <th>标签</th><td><input type="text" class="feedMeterPrevLabel" value="VK116/1069/4.26"></td>
-          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
-      <tr><th>进料数（kg）</th><td><input type="number" class="feedIn" min="0" oninput="calculate()"></td>
-          <th>标签</th><td><input type="text" class="feedInLabel" value="VK116/1069/4.26"></td>
-          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
-      <tr><th>今日料表（kg）</th><td><input type="number" class="feedMeterToday" min="0" oninput="calculate()"></td>
-          <th>标签</th><td><input type="text" class="feedMeterTodayLabel" value="VK116/1069/4.26"></td>
-          <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td></tr>
+      <tr><th>昨日料表（kg）</th><td><input type="number" id="feedMeterPrev" min="0" oninput="calculate()"></td>
+          <th>进料数（kg）</th><td><input type="number" id="feedIn" min="0" oninput="calculate()"></td></tr>
+      <tr><th>今日料表（kg）</th><td><input type="number" id="feedMeterToday" min="0" oninput="calculate()"></td>
+          <th>对比耗料（kg）</th><td><input type="number" id="feedCompare" min="0" oninput="calculate()"></td></tr>
+      <tr><th>添加剂日耗料（kg）</th><td><input type="number" id="additiveDaily" min="0" oninput="calculate()"></td></tr>
     </table>
-    <button class="add-row-btn" onclick="addFeedRow('昨日料表')">+ 昨日料表</button>
-    <button class="add-row-btn" onclick="addFeedRow('进料数')">+ 进料数</button>
-    <button class="add-row-btn" onclick="addFeedRow('今日料表')">+ 今日料表</button>
   </div>
 
   <div class="card" id="results">
@@ -103,26 +163,12 @@ function $(id) { return document.getElementById(id); }
 // 历史数据存储
 let history = JSON.parse(localStorage.getItem('eggFarmHistory')) || [];
 
-// 添加新的料板块行
-function addFeedRow(type) {
-  const table = $('feedTable');
-  const row = document.createElement('tr');
-  row.innerHTML = `
-    <th>${type}（kg）</th>
-    <td><input type="number" class="${type === '昨日料表' ? 'feedMeterPrev' : type === '进料数' ? 'feedIn' : 'feedMeterToday'}" min="0" oninput="calculate()"></td>
-    <th>标签</th>
-    <td><input type="text" class="${type === '昨日料表' ? 'feedMeterPrevLabel' : type === '进料数' ? 'feedInLabel' : 'feedMeterTodayLabel'}" value="VK116/1069/4.26"></td>
-    <td><button class="remove-row-btn" onclick="removeRow(this)">-</button></td>
-  `;
-  table.appendChild(row);
-}
-
-// 删除行
-function removeRow(btn) {
-  const row = btn.parentNode.parentNode;
-  row.parentNode.removeChild(row);
+// 设置默认日期为当前日期
+window.onload = function() {
+  const today = new Date().toISOString().split('T')[0];
+  $('date').value = today;
   calculate();
-}
+};
 
 // 计算逻辑
 function calculate() {
@@ -133,20 +179,13 @@ function calculate() {
   $('stockToday').value = stockToday >= 0 ? stockToday : 0;
 
   // 计算料板块数据
-  const feedMeterPrevInputs = document.querySelectorAll('.feedMeterPrev');
-  const feedInInputs = document.querySelectorAll('.feedIn');
-  const feedMeterTodayInputs = document.querySelectorAll('.feedMeterToday');
+  const feedMeterPrev = parseFloat($('feedMeterPrev').value) || 0;
+  const feedIn = parseFloat($('feedIn').value) || 0;
+  const feedMeterToday = parseFloat($('feedMeterToday').value) || 0;
+  const feedCompare = parseFloat($('feedCompare').value) || 0;
+  const additiveDaily = parseFloat($('additiveDaily').value) || 0;
 
-  let totalFeedMeterPrev = 0;
-  feedMeterPrevInputs.forEach(input => totalFeedMeterPrev += parseFloat(input.value) || 0);
-
-  let totalFeedIn = 0;
-  feedInInputs.forEach(input => totalFeedIn += parseFloat(input.value) || 0);
-
-  let totalFeedMeterToday = 0;
-  feedMeterTodayInputs.forEach(input => totalFeedMeterToday += parseFloat(input.value) || 0);
-
-  const totalFeed = totalFeedMeterPrev + totalFeedIn - totalFeedMeterToday;
+  const totalFeed = feedMeterPrev + feedIn - feedMeterToday + feedCompare + additiveDaily;
   const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
 
   // 计算与前日差值
@@ -205,7 +244,6 @@ function generateReport() {
   const date = new Date($('date').value);
   const dateStr = `${date.getMonth() + 1}月${date.getDate()}日`;
   const houseNumber = $('houseNumber').value || '未知';
-  const feedLabel = $('feedLabel').value || '未知';
   const breed = $('breed').value || '未知';
   const age = $('age').value || '未知';
   const stockToday = parseFloat($('stockToday').value) || 0;
@@ -226,29 +264,12 @@ function generateReport() {
   const boxWeight = parseFloat($('boxWeight').value) || 0;
   const avgWater = parseFloat($('avgWater').value) || 0;
 
-  const feedMeterPrevData = Array.from(document.querySelectorAll('.feedMeterPrev')).map((input, i) => {
-    const label = document.querySelectorAll('.feedMeterPrevLabel')[i].value;
-    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
-  }).join(', ');
-  const feedInData = Array.from(document.querySelectorAll('.feedIn')).map((input, i) => {
-    const label = document.querySelectorAll('.feedInLabel')[i].value;
-    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
-  }).join(', ');
-  const feedMeterTodayData = Array.from(document.querySelectorAll('.feedMeterToday')).map((input, i) => {
-    const label = document.querySelectorAll('.feedMeterTodayLabel')[i].value;
-    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
-  }).join(', ');
-
   const report = `蛋鸡生产日报
-栋号：${houseNumber}
 日期：${dateStr}
-饲料标签：${feedLabel}
+栋号：${houseNumber}
 品种：${breed}
 日龄：${age}
 存栏：${stockToday}
-昨日料表（kg）：${feedMeterPrevData || '0'}
-进料数（kg）：${feedInData || '0'}
-今日料表（kg）：${feedMeterTodayData || '0'}
 收鸡蛋间：${collectTime}
 产蛋个数：${eggCount}
 产蛋斤数（斤）：${eggWeight.toFixed(1)}
@@ -268,9 +289,6 @@ function generateReport() {
 
   $('reportText').value = report;
 }
-
-// 初始化
-calculate();
 </script>
 </body>
 </html>
