@@ -89,7 +89,7 @@
       margin-left: 0.5rem;
     }
     textarea {
-      height: 100px;
+      height: 200px;
       resize: vertical;
     }
     .averages {
@@ -249,7 +249,8 @@ function calculate() {
   const avgFeed = stockToday ? (totalFeed / stockToday * 1000).toFixed(1) : 0;
 
   // 计算与前日差值
-  let feedDiff = '无前日数据';
+  let feedDiff = '（无前日数据）';
+  let deadDiff = '（无前日数据）';
   if ($('date').value) {
     const currentDate = new Date($('date').value);
     const prevDate = new Date(currentDate);
@@ -257,8 +258,10 @@ function calculate() {
     const prevDateStr = prevDate.toISOString().split('T')[0];
     const prevEntry = history.find(h => h.date === prevDateStr);
     if (prevEntry) {
-      const diff = (avgFeed - prevEntry.avgFeed).toFixed(1);
-      feedDiff = `与前日差值：${diff} g`;
+      const feedDifference = (avgFeed - prevEntry.avgFeed).toFixed(1);
+      feedDiff = `（${feedDifference >= 0 ? '+' : ''}${feedDifference}）`;
+      const deadDifference = deadCount - prevEntry.deadCount;
+      deadDiff = `（${deadDifference >= 0 ? '+' : ''}${deadDifference}）`;
     }
   }
   $('feedDiff').textContent = feedDiff;
@@ -296,7 +299,8 @@ function calculate() {
       layRate,
       eggPerHen,
       feedEggRatio,
-      waterFeedRatio
+      waterFeedRatio,
+      deadCount
     };
     history = history.filter(h => h.date !== entry.date);
     history.push(entry);
@@ -365,7 +369,10 @@ function generateReport() {
   const breed = $('breed').value || '未知';
   const age = $('age').value || '未知';
   const stockToday = parseFloat($('stockToday').value) || 0;
-  const collectTime = `${$('collectTimeStart').value}-${$('collectTimeEnd').value}` || '未知';
+  const deadCount = parseFloat($('deadCount').value) || 0;
+  const collectTimeStart = $('collectTimeStart').value.replace(':', '.');
+  const collectTimeEnd = $('collectTimeEnd').value.replace(':', '.');
+  const collectTime = `${collectTimeStart}--${collectTimeEnd}` || '未知';
   const eggCount = parseFloat($('eggCount').value) || 0;
   const eggWeight = parseFloat($('eggWeight').value) || 0;
   const brokenEggs = parseFloat($('brokenEggs').value) || 0;
@@ -383,45 +390,57 @@ function generateReport() {
   const boxWeight = parseFloat($('boxWeight').value) || 0;
   const avgWater = parseFloat($('avgWater').value) || 0;
 
+  let feedDiff = '（无前日数据）';
+  let deadDiff = '（无前日数据）';
+  if ($('date').value) {
+    const currentDate = new Date($('date').value);
+    const prevDate = new Date(currentDate);
+    prevDate.setDate(currentDate.getDate() - 1);
+    const prevDateStr = prevDate.toISOString().split('T')[0];
+    const prevEntry = history.find(h => h.date === prevDateStr);
+    if (prevEntry) {
+      const feedDifference = (avgFeed - prevEntry.avgFeed).toFixed(1);
+      feedDiff = `（${feedDifference >= 0 ? '+' : ''}${feedDifference}）`;
+      const deadDifference = deadCount - prevEntry.deadCount;
+      deadDiff = `（${deadDifference >= 0 ? '+' : ''}${deadDifference}）`;
+    }
+  }
+
   const feedMeterPrevData = Array.from(document.querySelectorAll('.feedMeterPrev')).map((input, i) => {
     const label = document.querySelectorAll('.feedMeterPrevLabel')[i].value;
-    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
-  }).join(', ');
+    return `${label}（${parseFloat(input.value || 0).toFixed(1)}）`;
+  });
   const feedInData = Array.from(document.querySelectorAll('.feedIn')).map((input, i) => {
     const label = document.querySelectorAll('.feedInLabel')[i].value;
-    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
-  }).join(', ');
-  const feedMeterTodayData = Array.from(document.querySelectorAll('.feedMeterToday')).map((input, i) => {
-    const label = document.querySelectorAll('.feedMeterTodayLabel')[i].value;
-    return `${parseFloat(input.value || 0).toFixed(1)} (${label})`;
-  }).join(', ');
+    return `${label}（${parseFloat(input.value || 0).toFixed(1)}）`;
+  });
 
-  const report = `蛋鸡生产日报
+  const feedLabelData = [...feedMeterPrevData, ...feedInData];
+  const feedLabelText = feedLabelData.length > 0 ? `饲料标签：\nVK116\n${feedLabelData.join('\n')}` : '饲料标签：\nVK116';
+
+  const report = `${houseNumber}
 日期：${dateStr}
-栋号：${houseNumber}
-品种：${breed}
-日龄：${age}
-存栏：${stockToday}
-昨日料表（kg）：${feedMeterPrevData || '0'}
-进料数（kg）：${feedInData || '0'}
-今日料表（kg）：${feedMeterTodayData || '0'}
-收鸡蛋间：${collectTime}
-产蛋个数：${eggCount}
-产蛋斤数（斤）：${eggWeight.toFixed(1)}
-日总采食（kg）：${totalFeed.toFixed(1)}
-日均采食（g）：${avgFeed}
-产蛋率（%）：${layRate}
-只均产蛋量（g）：${eggPerHen}
+${feedLabelText}
+品种:${breed}
+日龄:${age}
+存栏:${stockToday}
+死淘:${deadCount}${deadDiff}
+日总采食:${totalFeed.toFixed(0)}
+日均采食:${avgFeed}${feedDiff}
+产蛋个数:${eggCount}
+产蛋率:${layRate}
+收鸡蛋间:${collectTime}
 料蛋比：${feedEggRatio}
-水料比：${waterFeedRatio}
-破蛋个数：${brokenEggs}
-破蛋率（%）：${brokenRate}
-箱重（斤）：${boxWeight}
-日总饮水（t）：${waterTotal.toFixed(1)}
-日均饮水（g）：${avgWater}
-光照：${lighting}
+产蛋斤数:${eggWeight.toFixed(2)}
+只均产蛋量：${eggPerHen}
+破蛋个数:${brokenEggs}
+破蛋率:${brokenRate}
+箱重：${boxWeight}
+总饮水:${waterTotal.toFixed(2)}
+日均饮水：${avgWater}
+光照 ${lighting}
 天气：${weather}
-用药：${medication}`.trim();
+用药:${medication}`.trim();
 
   $('reportText').value = report;
 }
